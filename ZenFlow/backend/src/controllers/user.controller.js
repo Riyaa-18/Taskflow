@@ -47,5 +47,11 @@ const changePassword = async (req, res, next) => {
     res.json({ message: 'Password updated' });
   } catch (err) { next(err); }
 };
+const deleteAccount = async (req, res, next) => {
+  try {
+    await prisma.user.delete({ where: { id: req.user.id } });
+    res.json({ message: 'Account deleted successfully' });
+  } catch (err) { next(err); }
+};
 
-module.exports = { searchUsers, updateProfile, changePassword };
+module.exports = { searchUsers, updateProfile, changePassword, deleteAccount };
