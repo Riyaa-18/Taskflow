@@ -22,7 +22,7 @@ const signup = async (req, res, next) => {
 
     const hashed = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { name, email, password: hashed, role: role || 'member' },
+      data: { name, email, password: hashed, role: role?.toUpperCase() || 'MEMBER' },
      select: { id: true, name: true, email: true, avatar: true, role: true, createdAt: true },
     });
 
@@ -67,4 +67,5 @@ const getMe = async (req, res, next) => {
 };
 
 module.exports = { signup, login, getMe };
+
 
