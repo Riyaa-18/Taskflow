@@ -15,15 +15,15 @@ const signup = async (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) return res.status(400).json({ message: 'Email already registered' });
 
     const hashed = await bcrypt.hash(password, 12);
     const user = await prisma.user.create({
-      data: { name, email, password: hashed },
-      select: { id: true, name: true, email: true, avatar: true, createdAt: true },
+      data: { name, email, password: hashed, role: role || 'member' },
+     select: { id: true, name: true, email: true, avatar: true, role: true, createdAt: true },
     });
 
     const { accessToken } = generateTokens(user.id);
@@ -67,3 +67,4 @@ const getMe = async (req, res, next) => {
 };
 
 module.exports = { signup, login, getMe };
+
