@@ -72,6 +72,14 @@ export default function Layout() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${
+  user?.role === 'admin' 
+    ? 'bg-accent/20 text-accent' 
+    : 'bg-gray-600/30 text-gray-400'
+}`}>
+  {user?.role === 'admin' ? 'Admin' : 'Member'}
+</span>
+
             </div>
           </NavLink>
           <button onClick={handleLogout} className="sidebar-link w-full text-danger hover:text-danger hover:bg-danger/10">

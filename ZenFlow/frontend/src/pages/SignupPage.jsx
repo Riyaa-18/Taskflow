@@ -10,7 +10,7 @@ import { getErrorMessage } from '../utils/helpers'
 export default function SignupPage() {
   const navigate = useNavigate()
   const { setAuth } = useAuthStore()
-  const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'member' })
   const [showPass, setShowPass] = useState(false)
 
   const mutation = useMutation({
@@ -96,6 +96,18 @@ export default function SignupPage() {
               </button>
             </div>
           </div>
+          <div>
+  <label className="label">Role</label>
+  <select
+    className="input"
+    value={form.role}
+    onChange={(e) => setForm({ ...form, role: e.target.value })}
+  >
+    <option value="member">Member</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
+
 
           <button
             type="submit"
