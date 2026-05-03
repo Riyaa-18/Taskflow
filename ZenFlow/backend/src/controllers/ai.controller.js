@@ -35,4 +35,26 @@ Only return the JSON array, nothing else.`,
   }
 };
 
-module.exports = { suggestTasks };
+const insightHandler = async (req, res) => {
+  try {
+    const { prompt } = req.body;
+
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama-3.3-70b-versatile",
+    });
+
+    const insight = completion.choices[0]?.message?.content;
+    res.json({ insight });
+  } catch (error) {
+    console.error("Groq error:", error);
+    res.status(500).json({ insight: "Keep pushing! Focus on your high-priority tasks first." });
+  }
+};
+
+module.exports = { suggestTasks, insightHandler };

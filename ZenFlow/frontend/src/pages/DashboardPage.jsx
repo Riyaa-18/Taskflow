@@ -1,16 +1,74 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { 
   FolderKanban, CheckSquare, AlertTriangle, TrendingUp,
-  Clock, ArrowRight, Activity, BellRing, ShieldAlert
+  ArrowRight, Activity, BellRing, ShieldAlert, Brain, Sparkles
 } from 'lucide-react'
 import api from '../utils/api'
 import { useAuthStore } from '../store/authStore'
 import { StatusBadge, PriorityBadge } from '../components/ui/Badge'
 import Avatar from '../components/ui/Avatar'
 import { PageLoader } from '../components/ui/Spinner'
-import { formatRelativeTime, formatDate, isOverdue } from '../utils/helpers'
+import { formatDate, isOverdue } from '../utils/helpers'
 import PieChart from '../components/PieChart'
+
+function AIInsight({ stats, overdueTasks, myTasks }) {
+  const [insight, setInsight] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [shown, setShown] = useState(false)
+
+  const generateInsight = async () => {
+    setLoading(true)
+    setShown(true)
+    try {
+      const prompt = `You are a productivity coach. Analyze this task data and give a 2-3 sentence personalized insight:
+- Total tasks: ${stats?.totalTasks || 0}
+- Completed: ${stats?.completedTasks || 0}
+- In Progress: ${stats?.inProgressTasks || 0}
+- Overdue: ${overdueTasks?.length || 0}
+- Completion rate: ${Math.round((stats?.completedTasks / stats?.totalTasks) * 100) || 0}%
+Give actionable, encouraging advice. Be specific and direct.`
+
+      const res = await api.post('/api/ai/insight', { prompt })
+      setInsight(res.data.insight)
+    } catch {
+      setInsight("You're making progress! Focus on your overdue tasks first, then tackle high-priority items to maintain momentum.")
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div className="card p-6 border-accent/20 bg-accent/5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-display font-semibold text-white flex items-center gap-2">
+          <Brain size={18} className="text-accent" />
+          AI Productivity Insight
+        </h2>
+        <button
+          onClick={generateInsight}
+          disabled={loading}
+          className="btn-primary py-1.5 px-4 text-sm flex items-center gap-2"
+        >
+          <Sparkles size={14} />
+          {loading ? 'Analyzing...' : shown ? 'Refresh' : 'Analyze Me'}
+        </button>
+      </div>
+      {shown && (
+        <div className="bg-base-800 rounded-xl p-4 border border-base-600/50">
+          {loading ? (
+            <div className="flex items-center gap-3 text-gray-400">
+              <div className="spinner" />
+              <span className="text-sm">Analyzing your productivity patterns...</span>
+            </div>
+          ) : (
+            <p className="text-gray-300 text-sm leading-relaxed">{insight}</p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function DashboardPage() {
   const { user } = useAuthStore()
@@ -23,10 +81,8 @@ export default function DashboardPage() {
 
   if (isLoading) return <PageLoader />
 
-  // Destructuring with Role-Based filtering
   let { stats, myTasks = [], overdueTasks = [], recentActivities = [] } = data || {}
 
-  // MEMBER RESTRICTION: Agar member hai, toh stats ko filter karo (Optional: Backend usually handles this, but frontend safety is good)
   const statCards = [
     { label: isAdmin ? 'Total Projects' : 'My Projects', value: stats?.totalProjects ?? 0, icon: FolderKanban, color: 'text-accent', bg: 'bg-accent/10', border: 'border-accent/20' },
     { label: 'My Tasks', value: stats?.myTasksCount ?? 0, icon: CheckSquare, color: 'text-info', bg: 'bg-info/10', border: 'border-info/20' },
@@ -39,7 +95,7 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-8 animate-in">
-      {/* Header with Role Badge */}
+      {/* Header */}
       <div className="flex justify-between items-end">
         <div>
           <p className="text-gray-500 text-sm font-body mb-1">{greeting} 👋</p>
@@ -52,7 +108,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* MEMBER WARNING BOX: Only shows for members if they have overdue tasks */}
+      {/* Member Warning */}
       {!isAdmin && overdueTasks.length > 0 && (
         <div className="bg-danger/10 border border-danger/30 rounded-2xl p-4 flex items-center gap-4 animate-pulse">
           <div className="w-12 h-12 bg-danger/20 rounded-xl flex items-center justify-center text-danger">
@@ -60,7 +116,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex-1">
             <h3 className="text-white font-bold text-sm">Action Required!</h3>
-            <p className="text-gray-400 text-xs">Bhai, you have {overdueTasks.length} tasks past the deadline. Complete them to maintain your ZenFlow.</p>
+            <p className="text-gray-400 text-xs">You have {overdueTasks.length} tasks past the deadline. Complete them to maintain your ZenFlow.</p>
           </div>
           <Link to="/tasks" className="btn-secondary py-2 px-4 text-xs">Fix Now</Link>
         </div>
@@ -80,7 +136,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* My Tasks (Filtered for Member) */}
+        {/* Tasks */}
         <div className="lg:col-span-2 card">
           <div className="flex items-center justify-between p-6 border-b border-base-600/50">
             <h2 className="font-display font-semibold text-white flex items-center gap-2">
@@ -96,7 +152,7 @@ export default function DashboardPage() {
               <div className="p-8 text-center text-gray-500 text-sm">No active tasks right now</div>
             ) : (
               myTasks.slice(0, 5).map((task) => (
-                <div key={task.id} className="p-4 hover:bg-base-700/30 transition-colors group">
+                <div key={task.id} className="p-4 hover:bg-base-700/30 transition-colors">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium mb-1.5 truncate ${task.status === 'DONE' ? 'line-through text-gray-500' : 'text-gray-200'}`}>
@@ -112,11 +168,9 @@ export default function DashboardPage() {
                         )}
                       </div>
                     </div>
-                    <div className="text-right">
-                       <p className={`text-[10px] font-mono ${isOverdue(task.dueDate) ? 'text-danger' : 'text-gray-500'}`}>
-                         {formatDate(task.dueDate)}
-                       </p>
-                    </div>
+                    <p className={`text-[10px] font-mono ${isOverdue(task.dueDate) ? 'text-danger' : 'text-gray-500'}`}>
+                      {formatDate(task.dueDate)}
+                    </p>
                   </div>
                 </div>
               ))
@@ -124,7 +178,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Task Overview (Charts) */}
+        {/* Productivity */}
         <div className="card p-6">
           <h2 className="font-display font-semibold text-white mb-6 flex items-center gap-2">
             <Activity size={18} className="text-info" />
@@ -140,23 +194,25 @@ export default function DashboardPage() {
               size={140} 
             />
             <div className="mt-8 w-full space-y-4">
-               {/* Simplified progress bars */}
-               <div className="flex justify-between text-xs mb-1 text-gray-400">
-                  <span>Task Completion</span>
-                  <span>{Math.round((stats?.completedTasks / stats?.totalTasks) * 100) || 0}%</span>
-               </div>
-               <div className="w-full h-1.5 bg-base-700 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-success transition-all duration-1000" 
-                    style={{ width: `${(stats?.completedTasks / stats?.totalTasks) * 100}%` }}
-                  />
-               </div>
+              <div className="flex justify-between text-xs mb-1 text-gray-400">
+                <span>Task Completion</span>
+                <span>{Math.round((stats?.completedTasks / stats?.totalTasks) * 100) || 0}%</span>
+              </div>
+              <div className="w-full h-1.5 bg-base-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-success transition-all duration-1000" 
+                  style={{ width: `${(stats?.completedTasks / stats?.totalTasks) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Overdue Section: Extra warnings for Members */}
+      {/* AI Insight */}
+      <AIInsight stats={stats} overdueTasks={overdueTasks} myTasks={myTasks} />
+
+      {/* Overdue */}
       {overdueTasks.length > 0 && (
         <div className="card border-danger/30 bg-danger/5">
           <div className="p-4 border-b border-danger/20 flex items-center justify-between">
@@ -173,9 +229,7 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-white">{task.title}</p>
                   <p className="text-[10px] text-gray-500 uppercase tracking-tighter">{task.project?.name}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-danger font-bold italic">Due {formatDate(task.dueDate)}</p>
-                </div>
+                <p className="text-xs text-danger font-bold italic">Due {formatDate(task.dueDate)}</p>
               </div>
             ))}
           </div>
@@ -184,4 +238,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
