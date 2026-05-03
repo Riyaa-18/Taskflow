@@ -27,11 +27,11 @@ export default function TaskCard({ task, projectId, members = [], showProject = 
 
   const statusMutation = useMutation({
     mutationFn: (status) => api.put(`/api/tasks/${task.id}`, { status }),
-    onSuccess: (_, status) => {
-      if (status === 'DONE') {
-        addXP(10)
-        toast.success('✅ +10 XP earned!')
-      }
+    onSuccess: (_, newStatus) => {
+  if (newStatus === 'DONE') {
+    addXP(10)
+    toast.success('✅ +10 XP earned!')
+  }
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
