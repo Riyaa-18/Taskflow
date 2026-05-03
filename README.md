@@ -1,4 +1,4 @@
-# TaskFlow — Team Task Manager
+# ZenTask — Team Task Manager
 
 A full-stack project & task management platform with role-based access control.
 
