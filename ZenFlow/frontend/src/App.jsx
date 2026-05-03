@@ -8,7 +8,7 @@ import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import TasksPage from './pages/TasksPage'
 import ProfilePage from './pages/ProfilePage'
-import TeamPage from './pages/TeamPage'
+import AutoSchedulePage from './pages/AutoSchedulePage'
 
 const PrivateRoute = () => {
   const { isAuthenticated } = useAuthStore()
@@ -43,6 +43,7 @@ export default function App() {
 
             <Route element={<AdminRoute />}>
               <Route path="/team" element={<TeamPage />} />
+              <Route path="/schedule" element={<AutoSchedulePage />} />
             </Route>
           </Route>
         </Route>

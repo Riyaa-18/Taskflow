@@ -1,8 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { 
-  LayoutDashboard, FolderKanban, CheckSquare, 
-  LogOut, Zap, Bell, Menu, Users
-} from 'lucide-react'
+import { LayoutDashboard, FolderKanban, CheckSquare, LogOut, Zap, Bell, Menu, Users, Calendar } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
 import { useQuery } from '@tanstack/react-query'
@@ -18,6 +15,7 @@ const navItems = [
 
 const adminNavItems = [
   { to: '/team', icon: Users, label: 'Team Members' },
+  { to: '/schedule', icon: Calendar, label: 'Auto Schedule' },
 ]
 
 function NotificationBell() {
