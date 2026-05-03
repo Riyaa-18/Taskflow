@@ -57,4 +57,4 @@ const insightHandler = async (req, res) => {
   }
 };
 
-module.exports = { suggestTasks, insightHandler };
+module.exports = { suggestTasks, insightHandler, autoScheduleHandler };
