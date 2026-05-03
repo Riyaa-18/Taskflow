@@ -5,9 +5,14 @@ const prisma = new PrismaClient();
 const getTasks = async (req, res, next) => {
   try {
     const { status, priority, assigneeId } = req.query;
-    const where = {
-      project: { members: { some: { userId: req.user.id } } },
-    };
+    const isAdmin = req.user.role === 'ADMIN'
+const all = req.query.all === 'true'
+
+const where = {
+  ...(isAdmin && all ? {} : {
+    project: { members: { some: { userId: req.user.id } } },
+  }),
+};
     if (status) where.status = status;
     if (priority) where.priority = priority;
     if (assigneeId) where.assigneeId = assigneeId;
