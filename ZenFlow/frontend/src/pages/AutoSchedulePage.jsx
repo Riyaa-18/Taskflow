@@ -23,7 +23,7 @@ export default function AutoSchedulePage() {
 
   const { data: tasksData, isLoading } = useQuery({
     queryKey: ['tasks'],
-    queryFn: () => api.get('/api/tasks?all=true').then(r => r.data),
+    queryFn: () => api.get('/api/tasks').then(r => r.data),
   })
 
   const pendingTasks = tasksData?.filter(t => t.status !== 'DONE') || []
