@@ -8,6 +8,7 @@ import ProjectsPage from './pages/ProjectsPage'
 import ProjectDetailPage from './pages/ProjectDetailPage'
 import TasksPage from './pages/TasksPage'
 import ProfilePage from './pages/ProfilePage'
+import TeamPage from './pages/TeamPage'
 
 const PrivateRoute = () => {
   const { isAuthenticated } = useAuthStore()
@@ -17,6 +18,11 @@ const PrivateRoute = () => {
 const PublicRoute = ({ children }) => {
   const { isAuthenticated } = useAuthStore()
   return !isAuthenticated ? children : <Navigate to="/dashboard" replace />
+}
+
+const AdminRoute = () => {
+  const { user } = useAuthStore()
+  return user?.role === 'ADMIN' ? <Outlet /> : <Navigate to="/dashboard" replace />
 }
 
 export default function App() {
@@ -34,6 +40,10 @@ export default function App() {
             <Route path="/projects/:id" element={<ProjectDetailPage />} />
             <Route path="/tasks" element={<TasksPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+
+            <Route element={<AdminRoute />}>
+              <Route path="/team" element={<TeamPage />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

@@ -14,7 +14,7 @@ const authenticate = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
-      select: { id: true, name: true, email: true, avatar: true },
+      select: { id: true, name: true, email: true, avatar: true, role: true },
     });
 
     if (!user) return res.status(401).json({ message: 'User not found' });

@@ -53,5 +53,34 @@ const deleteAccount = async (req, res, next) => {
     res.json({ message: 'Account deleted successfully' });
   } catch (err) { next(err); }
 };
+const getTeamMembers = async (req, res, next) => {
+  try {
+    const users = await prisma.user.findMany({
+      select: {
+        id: true, name: true, email: true, avatar: true, role: true,
+        assignedTasks: {
+          select: { id: true, status: true, dueDate: true }
+        }
+      }
+    })
 
-module.exports = { searchUsers, updateProfile, changePassword, deleteAccount };
+    const members = users.map(user => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      stats: {
+        done: user.assignedTasks.filter(t => t.status === 'DONE').length,
+        inProgress: user.assignedTasks.filter(t => t.status === 'IN_PROGRESS').length,
+        overdue: user.assignedTasks.filter(t => 
+          t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'DONE'
+        ).length,
+      }
+    }))
+
+    res.json(members)
+  } catch (err) { next(err) }
+}
+
+module.exports = { searchUsers, updateProfile, changePassword, deleteAccount, getTeamMembers };

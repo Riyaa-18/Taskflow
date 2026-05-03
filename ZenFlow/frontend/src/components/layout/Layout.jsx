@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, FolderKanban, CheckSquare, 
-  LogOut, Zap, Bell, Menu
+  LogOut, Zap, Bell, Menu, Users
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
@@ -12,6 +12,10 @@ const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/projects', icon: FolderKanban, label: 'Projects' },
   { to: '/tasks', icon: CheckSquare, label: 'My Tasks' },
+]
+
+const adminNavItems = [
+  { to: '/team', icon: Users, label: 'Team Members' },
 ]
 
 export default function Layout() {
@@ -61,6 +65,23 @@ export default function Layout() {
               <span>{label}</span>
             </NavLink>
           ))}
+
+          {user?.role === 'ADMIN' && (
+            <>
+              <p className="label px-4 mb-3 mt-4">Admin</p>
+              {adminNavItems.map(({ to, icon: Icon, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  onClick={() => setSidebarOpen(false)}
+                  className={({ isActive }) => cn('sidebar-link', isActive && 'active')}
+                >
+                  <Icon size={18} />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
+            </>
+          )}
         </nav>
 
         {/* User section */}
