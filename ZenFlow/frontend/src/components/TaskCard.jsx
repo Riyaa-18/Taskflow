@@ -27,11 +27,7 @@ export default function TaskCard({ task, projectId, members = [], showProject = 
 
   const statusMutation = useMutation({
     mutationFn: (status) => api.put(`/api/tasks/${task.id}`, { status }),
-    onSuccess: (_, newStatus) => {
-  if (newStatus === 'DONE') {
-    addXP(10)
-    toast.success('✅ +10 XP earned!')
-  }
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
@@ -54,7 +50,14 @@ export default function TaskCard({ task, projectId, members = [], showProject = 
         <div className="flex items-start gap-3">
           <button
             title={`Move to ${NEXT_STATUS[task.status]}`}
-            onClick={() => statusMutation.mutate(NEXT_STATUS[task.status])}
+            onClick={() => {
+              const nextStatus = NEXT_STATUS[task.status]
+              if (nextStatus === 'DONE') {
+                addXP(10)
+                toast.success('✅ +10 XP earned!')
+              }
+              statusMutation.mutate(nextStatus)
+            }}
             className="mt-0.5 w-4 h-4 rounded-full border-2 flex-shrink-0 transition-all hover:scale-125"
             style={{ 
               borderColor: task.status === 'DONE' ? '#22c55e' : '#3d3d55',
