@@ -40,7 +40,7 @@ export default function LoginPage() {
           <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center shadow-glow">
             <Zap size={20} className="text-white" />
           </div>
-          <span className="font-display font-bold text-2xl text-white">TaskFlow</span>
+          <span className="font-display font-bold text-2xl text-white">ZenTask</span>
         </div>
 
         <div className="relative">
@@ -80,7 +80,7 @@ export default function LoginPage() {
             <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center">
               <Zap size={18} className="text-white" />
             </div>
-            <span className="font-display font-bold text-xl text-white">TaskFlow</span>
+            <span className="font-display font-bold text-xl text-white">ZenTask</span>
           </div>
 
           <div className="mb-8">

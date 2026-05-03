@@ -41,7 +41,7 @@ export default function Layout() {
               <Zap size={18} className="text-white" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-lg text-white leading-none">TaskFlow</h1>
+              <h1 className="font-display font-bold text-lg text-white leading-none">ZenTask</h1>
               <p className="text-xs text-gray-500 font-body mt-0.5">Team workspace</p>
             </div>
           </div>

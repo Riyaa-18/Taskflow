@@ -17,7 +17,7 @@ export default function SignupPage() {
     mutationFn: (data) => api.post('/api/auth/signup', data),
     onSuccess: ({ data }) => {
       setAuth(data.user, data.accessToken)
-      toast.success(`Welcome to TaskFlow, ${data.user.name}!`)
+      toast.success(`Welcome to ZenTask, ${data.user.name}!`)
       navigate('/dashboard')
     },
     onError: (err) => toast.error(getErrorMessage(err)),
@@ -30,7 +30,7 @@ export default function SignupPage() {
           <div className="w-9 h-9 bg-accent rounded-xl flex items-center justify-center shadow-glow-sm">
             <Zap size={18} className="text-white" />
           </div>
-          <span className="font-display font-bold text-xl text-white">TaskFlow</span>
+          <span className="font-display font-bold text-xl text-white">ZenTask</span>
         </div>
 
         <div className="mb-8">
@@ -38,7 +38,6 @@ export default function SignupPage() {
           <p className="text-gray-400">Start managing projects with your team today</p>
         </div>
 
-        {/* Perks */}
         <div className="grid grid-cols-2 gap-3 mb-8">
           {['Role-based access', 'Task tracking', 'Team collaboration', 'Live dashboard'].map((perk) => (
             <div key={perk} className="flex items-center gap-2 text-sm text-gray-400">
@@ -96,18 +95,18 @@ export default function SignupPage() {
               </button>
             </div>
           </div>
-          <div>
-  <label className="label">Role</label>
-  <select
-    className="input"
-    value={form.role}
-    onChange={(e) => setForm({ ...form, role: e.target.value })}
-  >
-    <option value="member">Member</option>
-    <option value="admin">Admin</option>
-  </select>
-</div>
 
+          <div>
+            <label className="label">Role</label>
+            <select
+              className="input"
+              value={form.role}
+              onChange={(e) => setForm({ ...form, role: e.target.value })}
+            >
+              <option value="member">Member</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
           <button
             type="submit"
