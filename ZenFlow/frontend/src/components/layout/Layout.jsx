@@ -5,6 +5,8 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
+import { useQuery } from '@tanstack/react-query'
+import api from '../../utils/api'
 import Avatar from '../ui/Avatar'
 import { cn } from '../../utils/helpers'
 
@@ -17,6 +19,93 @@ const navItems = [
 const adminNavItems = [
   { to: '/team', icon: Users, label: 'Team Members' },
 ]
+
+function NotificationBell() {
+  const [open, setOpen] = useState(false)
+  const [read, setRead] = useState(false)
+
+  const { data } = useQuery({
+    queryKey: ['dashboard'],
+    queryFn: () => api.get('/api/dashboard').then(r => r.data),
+  })
+
+  const overdueTasks = data?.overdueTasks || []
+  const myTasks = data?.myTasks || []
+
+  const notifications = [
+    ...overdueTasks.slice(0, 3).map(t => ({
+      id: t.id,
+      type: 'overdue',
+      message: `"${t.title}" is overdue!`,
+      time: 'Past deadline',
+      icon: '⚠️'
+    })),
+    ...myTasks.filter(t => t.status !== 'DONE').slice(0, 2).map(t => ({
+      id: t.id + 'p',
+      type: 'pending',
+      message: `"${t.title}" is pending`,
+      time: 'In progress',
+      icon: '📌'
+    })),
+  ]
+
+  const unread = read ? 0 : notifications.length
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => { setOpen(!open); setRead(true) }}
+        className="btn-ghost p-2 relative"
+      >
+        <Bell size={18} />
+        {unread > 0 && (
+          <span className="absolute top-1 right-1 w-4 h-4 bg-danger rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+            {unread}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-12 z-50 w-80 bg-base-800 border border-base-600/50 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="p-4 border-b border-base-600/50 flex items-center justify-between">
+              <h3 className="font-display font-semibold text-white text-sm">Notifications</h3>
+              <button
+                onClick={() => setRead(true)}
+                className="text-xs text-accent-light hover:text-accent"
+              >
+                Mark all read
+              </button>
+            </div>
+            <div className="max-h-72 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-6 text-center text-gray-500 text-sm">
+                  🎉 All caught up!
+                </div>
+              ) : (
+                notifications.map(n => (
+                  <div key={n.id} className="p-4 border-b border-base-700/50 hover:bg-base-700/30 transition-colors">
+                    <div className="flex items-start gap-3">
+                      <span className="text-lg">{n.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-200">{n.message}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{n.time}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className="p-3 border-t border-base-600/50">
+              <p className="text-xs text-center text-gray-500">ZenTask Notifications</p>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
 
 export default function Layout() {
   const { user, logout, xp, badges } = useAuthStore()
@@ -149,10 +238,7 @@ export default function Layout() {
             <Menu size={20} />
           </button>
           <div className="flex-1" />
-          <button className="btn-ghost p-2 relative">
-            <Bell size={18} />
-            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-accent rounded-full"></span>
-          </button>
+          <NotificationBell />
           <NavLink to="/profile">
             <Avatar name={user?.name} size="sm" className="cursor-pointer hover:ring-2 ring-accent/50 transition-all" />
           </NavLink>
