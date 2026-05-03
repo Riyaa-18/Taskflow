@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { 
   LayoutDashboard, FolderKanban, CheckSquare, 
-  User, LogOut, Zap, Bell, Menu, X
+  LogOut, Zap, Bell, Menu
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuthStore } from '../../store/authStore'
@@ -15,9 +15,12 @@ const navItems = [
 ]
 
 export default function Layout() {
-  const { user, logout } = useAuthStore()
+  const { user, logout, xp, badges } = useAuthStore()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  const level = Math.floor(xp / 50) + 1
+  const xpProgress = Math.min((xp % 50) * 2, 100)
 
   const handleLogout = () => {
     logout()
@@ -26,7 +29,6 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar */}
       <aside className={cn(
         'fixed inset-y-0 left-0 z-50 w-64 bg-base-800 border-r border-base-600/50 flex flex-col transition-transform duration-300',
         'lg:relative lg:translate-x-0',
@@ -73,15 +75,36 @@ export default function Layout() {
               <p className="text-sm font-medium text-gray-200 truncate">{user?.name}</p>
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full mt-1 inline-block ${
-  user?.role === 'admin' 
-    ? 'bg-accent/20 text-accent' 
-    : 'bg-gray-600/30 text-gray-400'
-}`}>
-  {user?.role === 'admin' ? 'Admin' : 'Member'}
-</span>
+                user?.role === 'ADMIN'
+                  ? 'bg-accent/20 text-accent'
+                  : 'bg-gray-600/30 text-gray-400'
+              }`}>
+                {user?.role === 'ADMIN' ? 'Admin' : 'Member'}
+              </span>
 
+              {/* XP Bar */}
+              <div className="mt-2">
+                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                  <span>⚡ {xp} XP</span>
+                  <span>Lv.{level}</span>
+                </div>
+                <div className="w-full bg-base-600 rounded-full h-1.5">
+                  <div
+                    className="bg-accent rounded-full h-1.5 transition-all duration-500"
+                    style={{ width: `${xpProgress}%` }}
+                  />
+                </div>
+                {badges.length > 0 && (
+                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                    {badges.map(b => (
+                      <span key={b.id} title={b.name} className="text-sm">{b.emoji}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </NavLink>
+
           <button onClick={handleLogout} className="sidebar-link w-full text-danger hover:text-danger hover:bg-danger/10">
             <LogOut size={18} />
             <span>Sign out</span>
@@ -89,17 +112,14 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* Overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-black/60 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar */}
         <header className="h-16 bg-base-800/80 backdrop-blur border-b border-base-600/50 flex items-center gap-4 px-6 flex-shrink-0">
           <button
             className="lg:hidden btn-ghost p-2"
@@ -117,7 +137,6 @@ export default function Layout() {
           </NavLink>
         </header>
 
-        {/* Page content */}
         <div className="flex-1 overflow-auto">
           <Outlet />
         </div>

@@ -7,10 +7,12 @@ import { StatusBadge, PriorityBadge } from '../ui/Badge'
 import Avatar from '../ui/Avatar'
 import TaskFormModal from './TaskFormModal'
 import { formatDate, isOverdue, getErrorMessage } from '../../utils/helpers'
+import { useAuthStore } from '../../store/authStore'
 
 export default function TaskCard({ task, projectId, members = [], showProject = false }) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
+  const { addXP } = useAuthStore()
 
   const deleteMutation = useMutation({
     mutationFn: () => api.delete(`/api/tasks/${task.id}`),
@@ -25,7 +27,11 @@ export default function TaskCard({ task, projectId, members = [], showProject = 
 
   const statusMutation = useMutation({
     mutationFn: (status) => api.put(`/api/tasks/${task.id}`, { status }),
-    onSuccess: () => {
+    onSuccess: (_, status) => {
+      if (status === 'DONE') {
+        addXP(10)
+        toast.success('✅ +10 XP earned!')
+      }
       queryClient.invalidateQueries({ queryKey: ['tasks'] })
       queryClient.invalidateQueries({ queryKey: ['project', projectId] })
       queryClient.invalidateQueries({ queryKey: ['dashboard'] })
@@ -46,7 +52,6 @@ export default function TaskCard({ task, projectId, members = [], showProject = 
     <>
       <div className="card p-4 group hover:border-accent/20 transition-all duration-200">
         <div className="flex items-start gap-3">
-          {/* Status toggle dot */}
           <button
             title={`Move to ${NEXT_STATUS[task.status]}`}
             onClick={() => statusMutation.mutate(NEXT_STATUS[task.status])}
